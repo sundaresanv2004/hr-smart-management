@@ -1,189 +1,154 @@
 "use client"
 
 import { useState } from "react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
+import { Loader } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { toast } from "@/hooks/use-toast"
-import { Loader2 } from "lucide-react"
-import {applicationSchema, applicationSchemaType} from "@/lib/zodSchema";
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
+import {signupSchema, signupSchemaType} from "@/lib/zodSchema";
 
-export default function JobApplicationForm() {
-    const [isSubmitting, setIsSubmitting] = useState(false)
 
-    const form = useForm<applicationSchemaType>({
-        resolver: zodResolver(applicationSchema),
+export default function RegisterPage() {
+    const router = useRouter()
+    const [isLoading, setIsLoading] = useState(false)
+    const [error, setError] = useState<string | null>(null)
+
+    const form = useForm<signupSchemaType>({
+        resolver: zodResolver(signupSchema),
         defaultValues: {
-            fullName: "",
+            name: "",
             email: "",
-            phone: "",
-            gender: undefined,
+            password: "",
+            confirmPassword: "",
         },
     })
 
-    async function onSubmit(data: applicationSchemaType) {
-        setIsSubmitting(true)
+    const onSubmit = async (values: signupSchemaType) => {
+        setIsLoading(true)
+        setError(null)
+
+        console.log(values)
 
         try {
-            const formData = new FormData()
-            formData.append("fullName", data.fullName)
-            formData.append("email", data.email)
-            formData.append("phone", data.phone)
-            formData.append("gender", data.gender)
-
-            console.log(formData)
-            console.log(data.resume)
-
-            formData.append("resume", data.resume)
-
-            const response = await fetch("http://192.168.72.28:8000/application/resume_upload", {
+            const response = await fetch("http://192.168.120.28:8000/application/register", {
                 method: "POST",
-                body: formData,
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    name: values.name,
+                    email: values.email,
+                    password: values.password,
+                }),
             })
+
+            const data = await response.json()
 
             if (!response.ok) {
-                throw new Error("Failed to submit application")
+                throw new Error(data.message || "Registration failed")
             }
 
-            toast({
-                title: "Application Submitted",
-                description: "Your job application has been successfully submitted.",
-            })
-
-
-            form.reset()
+            router.push("/login?registered=true")
         } catch (error) {
-            console.error("Error submitting form:", error)
-            toast({
-                title: "Submission Failed",
-                description: "There was an error submitting your application. Please try again.",
-                variant: "destructive",
-            })
-        } finally {
-            setIsSubmitting(false)
+            console.error(error)
+            setError(error instanceof Error ? error.message : "An error occurred during registration")
+            setIsLoading(false)
         }
     }
 
     return (
-        <div className="w-full max-w-3xl mx-auto">
-            <div>
+        <div className="min-h-screen flex items-center justify-center bg-white p-4">
+            <div className="w-full max-w-md">
+                <div className="text-center mb-8">
+                    <h1 className="text-3xl font-bold text-gray-900">Create an Account</h1>
+                </div>
+
+                {error && <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-md mb-6">{error}</div>}
+
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                         <FormField
                             control={form.control}
-                            name="fullName"
+                            name="name"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Full Name *</FormLabel>
+                                    <FormLabel className="text-gray-700">Full Name</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="John Doe" {...field} />
+                                        <Input placeholder="John Doe" className="bg-white text-gray-900 border-gray-300" {...field} />
                                     </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <FormField
-                                control={form.control}
-                                name="email"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Email *</FormLabel>
-                                        <FormControl>
-                                            <Input type="email" placeholder="john.doe@example.com" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            <FormField
-                                control={form.control}
-                                name="phone"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Phone Number *</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="(+91)" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
-
-                        <FormField
-                            control={form.control}
-                            name="gender"
-                            render={({field}) => (
-                                <FormItem className="flex flex-col">
-                                    <FormLabel>Gender</FormLabel>
-                                    <Select
-                                        onValueChange={field.onChange}
-                                        defaultValue={field.value}
-                                    >
-                                        <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue
-                                                    placeholder="Select your gender"
-                                                />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            <SelectItem value="MALE">Male</SelectItem>
-                                            <SelectItem value="FEMALE">Female</SelectItem>
-                                            <SelectItem value="OTHERS">Prefer not to say</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage/>
+                                    <FormMessage className="text-red-600" />
                                 </FormItem>
                             )}
                         />
 
                         <FormField
                             control={form.control}
-                            name="resume"
-                            render={({ field: { value, onChange, ...fieldProps } }) => (
+                            name="email"
+                            render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Resume (PDF) *</FormLabel>
+                                    <FormLabel className="text-gray-700">Email</FormLabel>
                                     <FormControl>
                                         <Input
-                                            type="file"
-                                            accept="application/pdf"
-                                            onChange={(e) => {
-                                                const file = e.target.files?.[0]
-                                                if (file) {
-                                                    onChange(file)
-                                                }
-                                            }}
-                                            {...fieldProps}
+                                            placeholder="name@example.com"
+                                            type="email"
+                                            className="bg-white text-gray-900 border-gray-300"
+                                            {...field}
                                         />
                                     </FormControl>
-                                    <FormDescription>Upload your resume in PDF format (max 5MB).</FormDescription>
-                                    <FormMessage />
+                                    <FormMessage className="text-red-600" />
                                 </FormItem>
                             )}
                         />
 
-                        <Button type="submit" className="w-full" disabled={isSubmitting}>
-                            {isSubmitting ? (
-                                <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Submitting...
-                                </>
-                            ) : (
-                                "Submit Application"
+                        <FormField
+                            control={form.control}
+                            name="password"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="text-gray-700">Password</FormLabel>
+                                    <FormControl>
+                                        <Input type="password" className="bg-white text-gray-900 border-gray-300" {...field} />
+                                    </FormControl>
+                                    <FormMessage className="text-red-600" />
+                                </FormItem>
                             )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="confirmPassword"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="text-gray-700">Confirm Password</FormLabel>
+                                    <FormControl>
+                                        <Input type="password" className="bg-white text-gray-900 border-gray-300" {...field} />
+                                    </FormControl>
+                                    <FormMessage className="text-red-600" />
+                                </FormItem>
+                            )}
+                        />
+
+                        <Button
+                            type="submit"
+                            className="w-full p-2.5 rounded-md transition-colors flex flex-row items-center justify-center gap-2"
+                            disabled={isLoading}
+                        >
+                            {isLoading && <Loader className="animate-spin" />}
+                            {isLoading ? "Creating account..." : "Register"}
                         </Button>
                     </form>
                 </Form>
-            </div>
-            <div className="flex justify-center text-sm text-muted-foreground">
-                By submitting this application, you agree to our privacy policy and terms of service.
+
+                <div className="text-center mt-6 text-sm text-gray-600">
+                    Already have an account?{" "}
+                    <Link href="/candidate/login" className="text-violet-600 hover:underline">
+                        Sign in
+                    </Link>
+                </div>
             </div>
         </div>
     )

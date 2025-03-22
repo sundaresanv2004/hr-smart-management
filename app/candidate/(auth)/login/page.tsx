@@ -1,31 +1,39 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
-import { signIn } from "next-auth/react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
-import { Loader } from 'lucide-react'
+import { Loader } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { loginSchema, type loginSchemaType } from "@/lib/zodSchema"
+import { setToken, isAuthenticated } from "@/auth"
+import { useSession } from "@/app/auth/session-provider"
 
 export default function LoginPage() {
     const router = useRouter()
     const searchParams = useSearchParams()
+    const { checkAuth } = useSession()
     const [isLoading, setIsLoading] = useState(false)
-    const [error, setError] = useState<string | null>(
-        searchParams.get("error") === "OAuthAccountNotLinked"
-            ? "Email already in use with different provider"
-            : null
+    const [error, setError] = useState<string | null>(null)
+    const [successMessage, setSuccessMessage] = useState<string | null>(
+        searchParams.get("registered") === "true" ? "Registration successful! Please log in." : null,
     )
+
+    // Redirect if already logged in
+    useEffect(() => {
+        if (isAuthenticated()) {
+            router.push("/candidate/apply")
+        }
+    }, [router])
 
     const form = useForm<loginSchemaType>({
         resolver: zodResolver(loginSchema),
         defaultValues: {
-            email: "",
+            username: "",
             password: "",
         },
     })
@@ -35,22 +43,58 @@ export default function LoginPage() {
         setError(null)
 
         try {
-            const result = await signIn("credentials", {
-                email: values.email,
-                password: values.password,
-                redirect: false,
+            // Send login request to FastAPI backend
+            const formData = new FormData()
+            formData.append("username", values.username)
+            formData.append("password", values.password)
+
+            const response = await fetch("http://192.168.120.28:8000/application/login", {
+                method: "POST",
+                // credentials: "include", // Important: This sends cookies with the request
+                body: formData,
             })
 
-            if (result?.error) {
-                setError("Invalid email or password")
-                setIsLoading(false)
-                return
+            if (!response.ok) {
+                const errorData = await response.json()
+                throw new Error(errorData.message || "Invalid email or password")
             }
 
-            router.push("/dashboard")
+            const data = await response.json()
+
+            // Store token if it's returned from the backend
+            if (data.token) {
+                setToken(data.token)
+            }
+
+            // Store user info if available
+            if (data.user) {
+                localStorage.setItem(
+                    "user",
+                    JSON.stringify({
+                        id: data.user.id || "",
+                        name: data.user.name || "",
+                        email: data.user.email || values.username,
+                    }),
+                )
+            } else {
+                // If no user data is returned, at least store the email
+                localStorage.setItem(
+                    "user",
+                    JSON.stringify({
+                        email: values.username,
+                    }),
+                )
+            }
+
+            // Update auth context
+            checkAuth()
+
+            // Redirect to dashboard on successful login
+            router.push("/candidate/apply")
         } catch (error) {
             console.error(error)
-            setError("An error occurred during sign in")
+            setError(error instanceof Error ? error.message : "An error occurred during sign in")
+        } finally {
             setIsLoading(false)
         }
     }
@@ -62,13 +106,17 @@ export default function LoginPage() {
                     <h1 className="text-3xl font-bold text-gray-900">Login</h1>
                 </div>
 
+                {successMessage && (
+                    <div className="bg-green-50 border border-green-200 text-green-700 p-3 rounded-md mb-6">{successMessage}</div>
+                )}
+
                 {error && <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-md mb-6">{error}</div>}
 
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                         <FormField
                             control={form.control}
-                            name="email"
+                            name="username"
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel className="text-gray-700">Email</FormLabel>
@@ -92,7 +140,7 @@ export default function LoginPage() {
                                 <FormItem>
                                     <div className="flex items-center justify-between">
                                         <FormLabel className="text-gray-700">Password</FormLabel>
-                                        <Link href="/forgot-password" className="text-xs text-violet-600 hover:underline">
+                                        <Link href="/candidate/forgot-password" className="text-xs text-violet-600 hover:underline">
                                             Forgot password?
                                         </Link>
                                     </div>
@@ -125,3 +173,4 @@ export default function LoginPage() {
         </div>
     )
 }
+
