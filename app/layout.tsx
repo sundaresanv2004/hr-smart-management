@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import {ReactNode} from "react";
+import { ThemeProvider } from "@/components/ui/theme-provider"
 
 const SpaceGrotesk = localFont({
   src: "./fonts/SpaceGrotesk.woff",
@@ -21,7 +22,14 @@ const RootLayout = ({ children }: { children: ReactNode }) => {
         <body
             className={`${SpaceGrotesk.className} antialiased`}
         >
-        {children}
+        <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem
+            disableTransitionOnChange
+        >
+            {children}
+        </ThemeProvider>
         </body>
       </html>
   );

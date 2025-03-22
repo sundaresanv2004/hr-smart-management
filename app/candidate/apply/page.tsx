@@ -1,4 +1,5 @@
 import JobApplicationForm from "@/components/candidate/job-application-form"
+import LogoutButton from "@/components/candidate/logout-button";
 
 export default function Home() {
     return (
@@ -8,6 +9,8 @@ export default function Home() {
                 Fill out the form below to apply for a position. All fields marked with * are required.
             </p>
             <JobApplicationForm />
+
+            <LogoutButton />
         </main>
     )
 }

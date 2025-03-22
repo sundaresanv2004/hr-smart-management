@@ -1,63 +1,73 @@
-// auth.ts
+// Token-based authentication utilities
 
-export const setToken = (token: string) => {
-  localStorage.setItem("token", token) // Store in localStorage
-  document.cookie = `token=${token}; path=/;` // Store in cookies if needed
+/**
+ * Store the authentication token in localStorage
+ */
+export const setToken = (token: string): void => {
+  if (typeof window !== "undefined") {
+    localStorage.setItem("auth_token", token)
+  }
 }
 
+/**
+ * Get the authentication token from localStorage
+ */
 export const getToken = (): string | null => {
-  if (typeof window === "undefined") return null
-
-  // First, check localStorage
-  const token = localStorage.getItem("token")
-  if (token) return token
-
-  // Check cookies (optional)
-  const cookies = document.cookie.split("; ")
-  for (const cookie of cookies) {
-    const [name, value] = cookie.split("=")
-    if (name === "token") return value
+  if (typeof window !== "undefined") {
+    return localStorage.getItem("auth_token")
   }
-
-  return null // No token found
+  return null
 }
 
-export const logout = () => {
-  if (typeof window === "undefined") return
-
-  localStorage.removeItem("token") // Remove from localStorage
-  localStorage.removeItem("user") // Remove user data
-  sessionStorage.removeItem("token") // Remove from sessionStorage (if used)
-  document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;" // Remove from cookies
-
-  // Optional: Call backend logout endpoint
-  try {
-    fetch("http://192.168.120.28:8000/application/logout", {
-      method: "POST",
-      credentials: "include",
-    }).catch(console.error)
-  } catch (error) {
-    console.error("Logout error:", error)
-  }
-}
-
+/**
+ * Check if the user is authenticated by verifying token existence
+ */
 export const isAuthenticated = (): boolean => {
-  return getToken() !== null // Check if token exists
-}
-
-export const getCurrentUser = () => {
-  if (typeof window === "undefined") return null
-
-  const user = localStorage.getItem("user")
-  return user ? JSON.parse(user) : null
-}
-
-// Function to check if user is authenticated and redirect if not
-export const requireAuth = (router: any) => {
-  if (typeof window !== "undefined" && !isAuthenticated()) {
-    router.push("/candidate/login")
-    return false
+  if (typeof window !== "undefined") {
+    return !!localStorage.getItem("auth_token")
   }
-  return true
+  return false
+}
+
+/**
+ * Remove the authentication token from localStorage
+ */
+export const removeToken = (): void => {
+  if (typeof window !== "undefined") {
+    localStorage.removeItem("auth_token")
+  }
+}
+
+/**
+ * Logout the user by removing token and user data
+ */
+export const logout = (): void => {
+  if (typeof window !== "undefined") {
+    localStorage.removeItem("auth_token")
+    localStorage.removeItem("user")
+  }
+}
+
+/**
+ * Get authentication headers for API requests
+ */
+export const getAuthHeaders = (): HeadersInit => {
+  const token = getToken()
+  return token ? { Authorization: `Bearer ${token}` } : {}
+}
+
+/**
+ * Make an authenticated API request
+ */
+export const fetchWithAuth = async (url: string, options: RequestInit = {}): Promise<Response> => {
+  const headers = {
+    ...options.headers,
+    ...getAuthHeaders(),
+  }
+
+  return fetch(url, {
+    ...options,
+    headers,
+  })
 }
 

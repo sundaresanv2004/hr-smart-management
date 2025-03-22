@@ -1,8 +1,7 @@
 "use client"
 
-import { createContext, useContext, useEffect, useState, ReactNode } from "react"
-import { getToken, isAuthenticated, getCurrentUser } from "@/auth"
-import { useRouter, usePathname } from "next/navigation"
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { isAuthenticated, getToken, logout } from '@/auth'
 
 type User = {
     id?: string
@@ -10,59 +9,64 @@ type User = {
     email: string
 } | null
 
-type AuthContextType = {
+type SessionContextType = {
+    isLoggedIn: boolean
     user: User
-    isLoading: boolean
-    isAuthenticated: boolean
-    checkAuth: () => boolean
+    checkAuth: () => void
+    logout: () => void
 }
 
-const AuthContext = createContext<AuthContextType>({
+const SessionContext = createContext<SessionContextType>({
+    isLoggedIn: false,
     user: null,
-    isLoading: true,
-    isAuthenticated: false,
-    checkAuth: () => false,
+    checkAuth: () => {},
+    logout: () => {},
 })
 
+export const useSession = () => useContext(SessionContext)
+
 export function SessionProvider({ children }: { children: ReactNode }) {
+    const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false)
     const [user, setUser] = useState<User>(null)
-    const [isLoading, setIsLoading] = useState(true)
-    const router = useRouter()
-    const pathname = usePathname()
 
-    // Function to check authentication status
-    const checkAuth = (): boolean => {
+    const checkAuth = () => {
         const authenticated = isAuthenticated()
-        const userData = getCurrentUser()
+        setIsLoggedIn(authenticated)
 
-        setUser(authenticated ? userData : null)
-        return authenticated
+        if (authenticated && typeof window !== 'undefined') {
+            try {
+                const userData = localStorage.getItem('user')
+                if (userData) {
+                    setUser(JSON.parse(userData))
+                }
+            } catch (error) {
+                console.error('Failed to parse user data:', error)
+            }
+        } else {
+            setUser(null)
+        }
+    }
+
+    const handleLogout = () => {
+        logout()
+        setIsLoggedIn(false)
+        setUser(null)
     }
 
     useEffect(() => {
-        // Check authentication on initial load
-        const authenticated = checkAuth()
-        setIsLoading(false)
-
-        // Redirect to login if accessing protected route without authentication
-        const protectedRoutes = ['/candidate/apply']
-        if (!authenticated && protectedRoutes.some(route => pathname?.startsWith(route))) {
-            router.push('/candidate/login')
-        }
-    }, [pathname, router])
+        checkAuth()
+    }, [])
 
     return (
-        <AuthContext.Provider
+        <SessionContext.Provider
             value={{
-        user,
-            isLoading,
-            isAuthenticated: !!user,
-            checkAuth,
-    }}
->
-    {children}
-    </AuthContext.Provider>
-)
+                isLoggedIn,
+                user,
+                checkAuth,
+                logout: handleLogout,
+            }}
+        >
+            {children}
+        </SessionContext.Provider>
+    )
 }
-
-export const useSession = () => useContext(AuthContext)

@@ -60,6 +60,8 @@ export default function LoginPage() {
             }
 
             const data = await response.json()
+            console.log(data)
+            localStorage.setItem("auth_token", data.access_token)
 
             // Store token if it's returned from the backend
             if (data.token) {
