@@ -9,10 +9,10 @@ import { Input } from "@/components/ui/input"
 import { toast } from "@/hooks/use-toast"
 import { Loader2 } from "lucide-react"
 import {applicationSchema, applicationSchemaType} from "@/lib/zodSchema";
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 
 export default function JobApplicationForm() {
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const token = localStorage.getItem("auth_token");
 
     const form = useForm<applicationSchemaType>({
         resolver: zodResolver(applicationSchema),
@@ -20,7 +20,7 @@ export default function JobApplicationForm() {
             fullName: "",
             email: "",
             phone: "",
-            gender: undefined,
+            // gender: undefined,
         },
     })
 
@@ -29,17 +29,24 @@ export default function JobApplicationForm() {
 
         try {
             const formData = new FormData()
-            formData.append("fullName", data.fullName)
-            formData.append("email", data.email)
-            formData.append("phone", data.phone)
-            formData.append("gender", data.gender)
+            // formData.append("fullName", data.fullName)
+            // formData.append("email", data.email)
+            // formData.append("phone", data.phone)
+            // formData.append("gender", data.gender)
+
+            console.log(data)
 
             formData.append("resume", data.resume)
 
-            const response = await fetch("http://192.168.72.28:8000/application/resume_upload", {
+            const response = await fetch("http://192.168.120.28:8000/application/resume_upload", {
                 method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                },
                 body: formData,
             })
+
+            console.log(formData)
 
             if (!response.ok) {
                 throw new Error("Failed to submit application")
@@ -112,34 +119,6 @@ export default function JobApplicationForm() {
                                 )}
                             />
                         </div>
-
-                        <FormField
-                            control={form.control}
-                            name="gender"
-                            render={({field}) => (
-                                <FormItem className="flex flex-col">
-                                    <FormLabel>Gender</FormLabel>
-                                    <Select
-                                        onValueChange={field.onChange}
-                                        defaultValue={field.value}
-                                    >
-                                        <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue
-                                                    placeholder="Select your gender"
-                                                />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            <SelectItem value="MALE">Male</SelectItem>
-                                            <SelectItem value="FEMALE">Female</SelectItem>
-                                            <SelectItem value="OTHERS">Prefer not to say</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage/>
-                                </FormItem>
-                            )}
-                        />
 
                         <FormField
                             control={form.control}

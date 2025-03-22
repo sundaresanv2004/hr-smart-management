@@ -52,7 +52,7 @@ export default function RegisterPage() {
                 throw new Error(data.message || "Registration failed")
             }
 
-            router.push("/login?registered=true")
+            router.push("/candidate/login?registered=true")
         } catch (error) {
             console.error(error)
             setError(error instanceof Error ? error.message : "An error occurred during registration")
