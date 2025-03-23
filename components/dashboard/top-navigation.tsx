@@ -121,9 +121,7 @@ export function TopNavigation({ userType }: TopNavigationProps) {
                         <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="icon" className="relative">
                                 <Bell className="h-5 w-5" />
-                                <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-primary text-white">
-                                    {userType === "candidate" ? "2" : "5"}
-                                </Badge>
+                                {/*<Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-primary text-white">0</Badge>*/}
                                 <span className="sr-only">Notifications</span>
                             </Button>
                         </DropdownMenuTrigger>
@@ -131,37 +129,11 @@ export function TopNavigation({ userType }: TopNavigationProps) {
                             <DropdownMenuLabel>Notifications</DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             <div className="max-h-80 overflow-auto">
-                                {userType === "candidate" ? (
-                                    <>
-                                        <DropdownMenuItem className="cursor-pointer p-4 flex flex-col items-start gap-1">
-                                            <div className="font-medium">Interview Scheduled</div>
-                                            <div className="text-sm text-muted-foreground">
-                                                Your interview for Frontend Developer has been scheduled
-                                            </div>
-                                            <div className="text-xs text-muted-foreground">1 hour ago</div>
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem className="cursor-pointer p-4 flex flex-col items-start gap-1">
-                                            <div className="font-medium">Application Status Update</div>
-                                            <div className="text-sm text-muted-foreground">
-                                                Your application for UX Designer has moved to review stage
-                                            </div>
-                                            <div className="text-xs text-muted-foreground">Yesterday</div>
-                                        </DropdownMenuItem>
-                                    </>
-                                ) : (
-                                    <>
-                                        <DropdownMenuItem className="cursor-pointer p-4 flex flex-col items-start gap-1">
-                                            <div className="font-medium">New candidate application</div>
-                                            <div className="text-sm text-muted-foreground">John Doe applied for Frontend Developer</div>
-                                            <div className="text-xs text-muted-foreground">2 hours ago</div>
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem className="cursor-pointer p-4 flex flex-col items-start gap-1">
-                                            <div className="font-medium">Leave Request</div>
-                                            <div className="text-sm text-muted-foreground">Michael Brown requested annual leave</div>
-                                            <div className="text-xs text-muted-foreground">3 hours ago</div>
-                                        </DropdownMenuItem>
-                                    </>
-                                )}
+                                <DropdownMenuItem className="cursor-pointer p-4 flex flex-col items-start gap-1">
+                                    <div className="text-sm text-center text-muted-foreground">
+                                        No New Notifications
+                                    </div>
+                                </DropdownMenuItem>
                             </div>
                         </DropdownMenuContent>
                     </DropdownMenu>

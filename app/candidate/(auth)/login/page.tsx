@@ -92,7 +92,7 @@ export default function LoginPage() {
             checkAuth()
 
             // Redirect to dashboard on successful login
-            router.push("/candidate/apply")
+            router.push("/candidate/dashboard")
         } catch (error) {
             console.error(error)
             setError(error instanceof Error ? error.message : "An error occurred during sign in")

@@ -85,8 +85,8 @@ const AppSidebar: React.FC<React.ComponentProps<typeof Sidebar>> = ({ ...props }
                   <LaptopMinimalCheck className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">Event&#39;25</span>
-                  <span className="truncate text-xs">Admin</span>
+                  <span className="truncate font-semibold">HR Flow</span>
+                  <span className="truncate text-xs">HR</span>
                 </div>
               </SidebarMenuButton>
             </SidebarMenuItem>
