@@ -6,6 +6,7 @@ import { DocumentUpload } from "@/components/dashboard/document-upload"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Calendar, CheckCircle, Clock, FileText } from "lucide-react"
+import Link from "next/link";
 
 const candidateData = {
     name: "John Smith",
@@ -37,7 +38,9 @@ export default function CandidateDashboardPage() {
     return (
         <div>
             <DashboardHeader heading="Welcome, John" text="Track your job applications and upcoming interviews">
-                <Button>Browse Jobs</Button>
+                <Link href="/candidate/job-listing">
+                    <Button>Browse Jobs</Button>
+                </Link>
             </DashboardHeader>
 
             <div className="grid gap-6 mt-8">

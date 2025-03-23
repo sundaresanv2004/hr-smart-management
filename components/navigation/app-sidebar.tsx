@@ -2,23 +2,15 @@
 
 import type * as React from "react"
 import {
-  Home,
   LayoutDashboard,
-  ListChecks,
   LaptopMinimalIcon as LaptopMinimalCheck,
-  User,
-  ClipboardList,
-  Gamepad2,
   Users,
-  ScanQrCode,
-  QrCodeIcon,
+  CreditCard, Package, PieChart, ShoppingCart, Inbox, Settings, BriefcaseBusiness,
 } from "lucide-react"
 import { NavMain } from "./nav-main"
-import { NavFooter } from "./nav-footer"
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -31,50 +23,48 @@ const data = {
   navMain: [
     {
       title: "Dashboard",
-      url: "/admin/dashboard",
+      url: "/dashboard",
       icon: LayoutDashboard,
     },
     {
-      title: "Events",
-      url: "/admin/events",
-      icon: ListChecks,
-    },
-    {
-      title: "Users",
-      url: "/admin/users",
-      icon: User,
-    },
-    {
-      title: "Registrations",
-      url: "/admin/registrations",
-      icon: ClipboardList,
-    },
-    {
-      title: "Scan History",
-      url: "/admin/scan-history",
-      icon: QrCodeIcon,
-    },
-  ],
-  navRoot: [
-    {
-      title: "Home Page",
-      url: "/",
-      icon: Home,
-    },
-    {
-      title: "Events",
-      url: "/events",
-      icon: Gamepad2,
-    },
-    {
-      title: "Scan QR",
-      url: "/admin/scan-qr",
-      icon: ScanQrCode,
-    },
-    {
-      title: "Team",
-      url: "/team",
+      title: "Onboarding",
+      url: "/onboarding",
       icon: Users,
+    },
+    {
+      title: "Job Posting",
+      url: "/job-posting",
+      icon: BriefcaseBusiness,
+    },
+    {
+      title: "Analytics",
+      url: "/admin/events",
+      icon: PieChart,
+    },
+    {
+      title: "Orders",
+      url: "/admin/users",
+      icon: ShoppingCart,
+    },
+    {
+      title: "Products",
+      url: "/admin/scan-history",
+      icon: Package,
+    },
+    {
+      title: "Invoices",
+      url: "/admin/scan-history",
+      icon: CreditCard,
+    },
+    {
+      title: "Messages",
+      url: "/admin/scan-history",
+      icon: Inbox,
+    },
+    {
+      title: "Settings",
+      url: "/admin/scan-history",
+      icon: Settings,
     },
   ],
 }
@@ -104,11 +94,7 @@ const AppSidebar: React.FC<React.ComponentProps<typeof Sidebar>> = ({ ...props }
         </SidebarHeader>
         <SidebarContent>
           <NavMain items={data.navMain} groupTitle="Admin" currentPath={pathname} />
-          <NavMain items={data.navRoot} groupTitle="Event" currentPath={pathname} />
         </SidebarContent>
-        <SidebarFooter>
-          <NavFooter />
-        </SidebarFooter>
         <SidebarRail />
       </Sidebar>
   )

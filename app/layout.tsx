@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import {ReactNode} from "react";
 import { ThemeProvider } from "@/components/ui/theme-provider"
+import {Toaster} from "@/components/ui/toaster";
 
 const SpaceGrotesk = localFont({
   src: "./fonts/SpaceGrotesk.woff",
@@ -29,6 +30,7 @@ const RootLayout = ({ children }: { children: ReactNode }) => {
             disableTransitionOnChange
         >
             {children}
+            <Toaster />
         </ThemeProvider>
         </body>
       </html>

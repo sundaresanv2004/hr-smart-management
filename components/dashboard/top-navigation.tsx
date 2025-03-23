@@ -52,7 +52,7 @@ export function TopNavigation({ userType }: TopNavigationProps) {
         },
         {
             title: "Job Listings",
-            href: "/candidate/jobs",
+            href: "/candidate/job-listing",
             icon: ClipboardList,
         },
         {

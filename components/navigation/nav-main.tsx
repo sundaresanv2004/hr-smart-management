@@ -34,7 +34,7 @@ export function NavMain({ items, groupTitle, currentPath }: NavMainProps) {
 
     return (
         <SidebarGroup>
-            <SidebarGroupLabel>{groupTitle}</SidebarGroupLabel>
+            {/*<SidebarGroupLabel>{groupTitle}</SidebarGroupLabel>*/}
             <SidebarGroupContent>
                 <SidebarMenu>
                     {items.map((item) => (
