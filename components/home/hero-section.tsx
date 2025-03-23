@@ -5,6 +5,7 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { CheckCircle2 } from 'lucide-react'
 import { motion } from "framer-motion"
+import {DashboardHero} from "@/public/images";
 
 export default function HeroSection() {
   const [mounted, setMounted] = useState(false)
@@ -100,7 +101,7 @@ export default function HeroSection() {
             <div className="relative w-full overflow-hidden rounded-xl border shadow-2xl">
               <div className="absolute inset-0 bg-gradient-to-tr from-violet-600/10 to-transparent pointer-events-none"></div>
               <Image
-                src="/placeholder.svg?height=550&width=800"
+                src={DashboardHero}
                 width={800}
                 height={550}
                 alt="HR Dashboard"

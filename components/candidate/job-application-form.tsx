@@ -6,21 +6,28 @@ import { useForm } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "@/hooks/use-toast"
 import { Loader2 } from "lucide-react"
-import {applicationSchema, applicationSchemaType} from "@/lib/zodSchema";
+import { applicationSchema, type applicationSchemaType } from "@/lib/zodSchema"
+import {useRouter} from "next/navigation";
 
-export default function JobApplicationForm() {
+interface JobApplicationFormProps {
+    jobId: string
+}
+
+export default function JobApplicationForm({ jobId }: JobApplicationFormProps) {
+    const route = useRouter()
     const [isSubmitting, setIsSubmitting] = useState(false)
-    const token = localStorage.getItem("auth_token");
+    const token = localStorage.getItem("auth_token")
 
     const form = useForm<applicationSchemaType>({
         resolver: zodResolver(applicationSchema),
         defaultValues: {
-            fullName: "",
+            name: "",
             email: "",
             phone: "",
-            // gender: undefined,
+            gender: undefined,
         },
     })
 
@@ -29,19 +36,20 @@ export default function JobApplicationForm() {
 
         try {
             const formData = new FormData()
-            // formData.append("fullName", data.fullName)
-            // formData.append("email", data.email)
-            // formData.append("phone", data.phone)
-            // formData.append("gender", data.gender)
-
-            console.log(data)
-
+            formData.append("name", data.name)
+            formData.append("email_id", data.email)
+            formData.append("mobile", data.phone)
+            formData.append("gender", data.gender || "")
+            formData.append("job_id", jobId)
             formData.append("resume", data.resume)
 
-            const response = await fetch("http://192.168.120.28:8000/application/resume_upload", {
+            console.log(data)
+            console.log(formData)
+
+            const response = await fetch("http://192.168.120.28:8000/application/job_apply", {
                 method: "POST",
                 headers: {
-                    "Authorization": `Bearer ${token}`,
+                    Authorization: `Bearer ${token}`,
                 },
                 body: formData,
             })
@@ -57,8 +65,8 @@ export default function JobApplicationForm() {
                 description: "Your job application has been successfully submitted.",
             })
 
-
             form.reset()
+            route.push('/candidate/dashboard')
         } catch (error) {
             console.error("Error submitting form:", error)
             toast({
@@ -78,7 +86,7 @@ export default function JobApplicationForm() {
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                         <FormField
                             control={form.control}
-                            name="fullName"
+                            name="name"
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Full Name *</FormLabel>
@@ -119,6 +127,29 @@ export default function JobApplicationForm() {
                                 )}
                             />
                         </div>
+
+                        <FormField
+                            control={form.control}
+                            name="gender"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Gender</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select your gender" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            <SelectItem value="male">Male</SelectItem>
+                                            <SelectItem value="female">Female</SelectItem>
+                                            <SelectItem value="others">Prefer not to say</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
 
                         <FormField
                             control={form.control}

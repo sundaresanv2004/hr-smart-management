@@ -1,10 +1,10 @@
 import { z } from "zod"
 
 export const applicationSchema = z.object({
-    fullName: z.string().min(2, { message: "Full name must be at least 2 characters." }),
+    name: z.string().min(2, { message: "Full name must be at least 2 characters." }),
     email: z.string().email({ message: "Please enter a valid email address." }),
     phone: z.string().min(10, { message: "Please enter a valid phone number." }),
-    gender: z.enum(["Male", "Female", "Prefer not to say"]).optional(),
+    gender: z.enum(["male", "female", "other"]).optional(),
     resume: z
         .instanceof(File)
         .refine((file) => file.size <= 5000000, { message: "File size must be less than 5MB." })
